@@ -22,6 +22,9 @@
     "start": "tsc -b -w",
     "test": "jest"
   },
+  "dependencies": {
+    "moment": "^2.29.4"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.5",

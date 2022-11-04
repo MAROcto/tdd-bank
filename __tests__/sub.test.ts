@@ -1,89 +1,125 @@
-import bankAccount from '../src/BankAccount'
+const moment = require('moment')
+import bankAccount, {
+  overdraftReachedError,
+  negativeDepositError,
+} from '../src/BankAccount'
+import ChoicePicker from '../src/ChoicePicker'
+import HorlogeTest from '../src/HorlogeTest'
 
 describe('bankAccount', () => {
-  describe('consult', () => {
+  describe('checkBalance', () => {
     test('Consult bank account created whith no money. Expect 0', () => {
       //Given
-      var account = new bankAccount()
+      const account = new bankAccount()
+      const emptyBalance = 0
       //When
-      var currentMoney = account.checkBalance()
+      const currentMoney = account.checkBalance()
       //Then
-      expect(currentMoney).toBe(0)
+      expect(currentMoney).toBe(emptyBalance)
     })
 
     test('Consult bank account created with 1000. Expect 1000', () => {
       //Given
-      var inputMoney = 1000
-      var account = new bankAccount(inputMoney)
+      const startingBalance = 1000
+      const account = new bankAccount(startingBalance)
       //When
-      var currentMoney = account.checkBalance()
+      const currentMoney = account.checkBalance()
       //Then
-      expect(currentMoney).toBe(inputMoney)
+      expect(currentMoney).toBe(startingBalance)
     })
   })
 
   describe('deposit', () => {
-    test('Deposit of 1000 to a bank account with no money. Expect 1000', () => {
-      //Given
-      var depositMoney = 1000
-      var account = new bankAccount()
-      //When
-      var returnedBalance = account.deposit(depositMoney)
-      //Then
-      expect(returnedBalance).toBe(depositMoney)
-    })
-
     test('Deposit of 1000 to a bank account with 100 money. Expect 1100', () => {
       //Given
-      var depositMoney = 1000
-      var inputMoney = 100
-      var account = new bankAccount(inputMoney)
-      var expectedBalance = depositMoney + inputMoney
+      const depositMoney = 1000
+      const startingBalance = 100
+      const horloge = new HorlogeTest()
+      const account = new bankAccount(startingBalance, horloge)
+      const expectedBalance = depositMoney + startingBalance
       //When
-      var returnedBalance = account.deposit(depositMoney)
+      const returnedBalance = account.deposit(depositMoney)
       //Then
       expect(returnedBalance).toBe(expectedBalance)
     })
 
-    test('Deposits add a transaction to the transaction list.', () => {
+    //TODO: check when deposit is negative
+
+    test('Deposit adds a transaction to the transaction list.', async () => {
       //Given
-      var depositMoney = 1000
-      var inputMoney = 100
-      var account = new bankAccount(inputMoney)
-      var expectedBalance = depositMoney + inputMoney
-      var expectedDate = new Date().toLocaleDateString()
+      const depositMoney = 1000
+      const startingBalance = 100
+      const horloge = new HorlogeTest()
+      const expectedDate = '14/01/2012 14:30:45.450346'
+      const account = new bankAccount(startingBalance, horloge)
+      const expectedBalance = depositMoney + startingBalance
+      await new Promise(r => setTimeout(r, 1))
       //When
-      account.deposit(depositMoney)
+      const returnedBalance = account.deposit(depositMoney)
       //Then
-      var transaction = account.transactions[0]
-      expect(transaction.date).toBe(expectedDate)
-      expect(transaction.value).toBe(depositMoney)
-      expect(transaction.newBalance).toBe(expectedBalance)
+      expect(returnedBalance).toBe(expectedBalance)
+      const transaction = account.transactions[0]
+      expect(transaction).toEqual({
+        date: expectedDate,
+        value: depositMoney,
+        newBalance: expectedBalance,
+      })
+    })
+
+    test("Deposit can't be negative", () => {
+      //Given
+      const depositMoney = -100
+      const startingBalance = 100
+      const account = new bankAccount(startingBalance)
+      //When
+      const returnedBalance = account.deposit(depositMoney)
+      //Then
+      expect(returnedBalance).toEqual(new negativeDepositError())
     })
   })
 
-  describe('withdrawal', () => {
-    test('Withdrawal of 100 to a bank account with 100 money. Expect 0', () => {
+  describe('withdraw', () => {
+    test('Withdraw adds a transaction to the transaction list.', () => {
       //Given
-      var inputMoney = 100
-      var withdrawalMoney = 100
-      var account = new bankAccount(inputMoney)
-      var expectedBalance = inputMoney - withdrawalMoney
+      const amountToWithdraw = 100
+      const startingBalance = 1000
+      const horloge = new HorlogeTest()
+      const account = new bankAccount(startingBalance, horloge)
+      const expectedBalance = startingBalance - amountToWithdraw
+      const expectedDate = '14/01/2012 14:30:45.450346'
       //When
-      var returnedBalance = account.withdraw(withdrawalMoney)
+      const returnedBalance = account.withdraw(amountToWithdraw)
       //Then
       expect(returnedBalance).toBe(expectedBalance)
+      const transaction = account.transactions[0]
+      expect(transaction).toEqual({
+        date: expectedDate,
+        value: -amountToWithdraw,
+        newBalance: expectedBalance,
+      })
     })
     test('Overdraft of more than -100 is not authorized', () => {
       //Given
-      var errorMessage = "Can't have an overdraft over -100"
-      var inputMoney = 0
-      var withdrawalMoney = 101
-      var account = new bankAccount(inputMoney)
+      const startingBalance = 0
+      const amountToWithdraw = 101
+      const account = new bankAccount(startingBalance)
       //When
-      var returnedBalance = account.withdraw(withdrawalMoney)
+      const returnedBalance = account.withdraw(amountToWithdraw)
       //Then
-      expect(returnedBalance).toBe(errorMessage)
+      expect(returnedBalance).toEqual(new overdraftReachedError())
+    })
+  })
+
+  describe('ChoicePicker', () => {
+    describe('greet', () => {
+      test('Return a greeting message', () => {
+        //Given
+        const picker = new ChoicePicker()
+        //When
+        const greetMessage = picker.greet()
+        //Then
+        expect(greetMessage).toBe('Welcome to InterBank.')
+      })
     })
   })
 })
