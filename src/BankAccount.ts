@@ -1,14 +1,22 @@
 import { Horloge } from './Horloge'
 import { transaction } from './transaction'
 import moment = require('moment')
+import HorlogeTest from './HorlogeTest'
+import { TransferManager } from './TransferManager'
 export default class BankAccount {
   private balance: number
   transactions: transaction[]
   horloge: Horloge
-  constructor(money: number = 0, horloge: Horloge = null) {
+  transferManager: TransferManager
+  constructor(
+    money: number = 0,
+    horloge: Horloge = new HorlogeTest([]),
+    transferManager: TransferManager = null
+  ) {
     this.balance = money
     this.horloge = horloge
     this.transactions = []
+    this.transferManager = transferManager
   }
   checkBalance(): number {
     return this.balance
@@ -37,6 +45,15 @@ export default class BankAccount {
       this.transactions.push(transaction)
       return this.balance
     }
+  }
+  transfer(amountToSend: number, receiverIban: number): number {
+    const request = {
+      ibanFrom: 67890,
+      ibanTo: receiverIban,
+      amount: amountToSend,
+    }
+    const response = this.transferManager.sendTransfer(request)
+    return response
   }
 }
 

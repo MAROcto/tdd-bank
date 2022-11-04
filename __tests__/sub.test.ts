@@ -1,10 +1,10 @@
-const moment = require('moment')
+import BankAccount from '../src/BankAccount'
 import bankAccount, {
   overdraftReachedError,
   negativeDepositError,
 } from '../src/BankAccount'
-import ChoicePicker from '../src/ChoicePicker'
 import HorlogeTest from '../src/HorlogeTest'
+import TransferTest from '../src/TransferTest'
 
 describe('bankAccount', () => {
   describe('checkBalance', () => {
@@ -138,16 +138,30 @@ describe('bankAccount', () => {
     })
   })
 
-  describe('ChoicePicker', () => {
-    describe('greet', () => {
-      test('Return a greeting message', () => {
-        //Given
-        const picker = new ChoicePicker()
-        //When
-        const greetMessage = picker.greet()
-        //Then
-        expect(greetMessage).toBe('Welcome to InterBank.')
-      })
+  describe('transfert', () => {
+    test('Check that the transfert worked and sends back HTTP_CODE 202', () => {
+      //Given
+      const expectedReponse = 202
+      const amountToSend = 100
+      const receiverIban = '123456'
+      const transfertManager = new TransferTest(true)
+      const account = new BankAccount(0, new HorlogeTest([]), transfertManager)
+      //When
+      const transfertResponse = account.transfer(amountToSend, receiverIban)
+      //Then
+      expect(transfertResponse).toBe(expectedReponse)
+    })
+    test('Check that the transfert failed and sends back HTTP_CODE 400', () => {
+      //Given
+      const expectedReponse = 400
+      const amountToSend = 100
+      const receiverIban = '123456'
+      const transfertManager = new TransferTest(false)
+      const account = new BankAccount(0, new HorlogeTest([]), transfertManager)
+      //When
+      const transfertResponse = account.transfer(amountToSend, receiverIban)
+      //Then
+      expect(transfertResponse).toBe(expectedReponse)
     })
   })
 })
