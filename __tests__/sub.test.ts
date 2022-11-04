@@ -41,6 +41,7 @@ describe('bankAccount', () => {
       const returnedBalance = account.deposit(depositMoney)
       //Then
       expect(returnedBalance).toBe(expectedBalance)
+      expect(horloge.nbCalls).toBeGreaterThan(0)
     })
 
     //TODO: check when deposit is negative
