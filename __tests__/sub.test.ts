@@ -13,9 +13,9 @@ describe('bankAccount', () => {
       const account = new bankAccount()
       const emptyBalance = 0
       //When
-      const currentMoney = account.checkBalance()
+      const currentBalance = account.checkBalance()
       //Then
-      expect(currentMoney).toBe(emptyBalance)
+      expect(currentBalance).toBe(emptyBalance)
     })
 
     test('Consult bank account created with 1000. Expect 1000', () => {
@@ -151,6 +151,9 @@ describe('bankAccount', () => {
       //Then
       expect(transfertResponse).toBe(expectedReponse)
     })
+
+    //TODO: Check what happends when not enough in balance to do the transfert.
+
     test('Check that the transfert failed and sends back HTTP_CODE 400', () => {
       //Given
       const expectedReponse = 400
