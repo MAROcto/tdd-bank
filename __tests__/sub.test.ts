@@ -143,7 +143,7 @@ describe('bankAccount', () => {
       //Given
       const expectedReponse = 202
       const amountToSend = 100
-      const receiverIban = '123456'
+      const receiverIban = 123456
       const transfertManager = new TransferTest(true)
       const account = new BankAccount(0, new HorlogeTest([]), transfertManager)
       //When
@@ -155,13 +155,27 @@ describe('bankAccount', () => {
       //Given
       const expectedReponse = 400
       const amountToSend = 100
-      const receiverIban = '123456'
+      const receiverIban = 123456
       const transfertManager = new TransferTest(false)
       const account = new BankAccount(0, new HorlogeTest([]), transfertManager)
       //When
       const transfertResponse = account.transfer(amountToSend, receiverIban)
       //Then
       expect(transfertResponse).toBe(expectedReponse)
+    })
+    test('Check that the transfert list is returned with HTTP_CODE 202', () => {
+      //Given
+      const expectedReponse = 202
+      const expectedTransferList = [
+        { number: '1', at: '1', ibanFrom: '1', ibanTo: '2', amount: '1' },
+      ]
+      const transfertManager = new TransferTest(true, expectedTransferList)
+      const account = new BankAccount(0, new HorlogeTest([]), transfertManager)
+      //When
+      const [transfertResponse, transfertList] = account.getTransferList()
+      //Then
+      expect(transfertResponse).toBe(expectedReponse)
+      expect(transfertList).toBe(expectedTransferList)
     })
   })
 })

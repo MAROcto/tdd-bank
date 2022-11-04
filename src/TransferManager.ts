@@ -4,4 +4,14 @@ export interface TransferManager {
     ibanTo: number
     amount: number
   }): number
+  getTransferList(): [
+    number,
+    {
+      number: string
+      at: string
+      ibanFrom: string
+      ibanTo: string
+      amount: string
+    }[]
+  ]
 }

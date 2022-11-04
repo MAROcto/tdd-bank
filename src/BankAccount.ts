@@ -55,6 +55,18 @@ export default class BankAccount {
     const response = this.transferManager.sendTransfer(request)
     return response
   }
+  getTransferList(): [
+    number,
+    {
+      number: string
+      at: string
+      ibanFrom: string
+      ibanTo: string
+      amount: string
+    }[]
+  ] {
+    return this.transferManager.getTransferList()
+  }
 }
 
 export class overdraftReachedError {}
