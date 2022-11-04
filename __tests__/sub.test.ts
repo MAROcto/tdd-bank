@@ -34,7 +34,7 @@ describe('bankAccount', () => {
       //Given
       const depositMoney = 1000
       const startingBalance = 100
-      const horloge = new HorlogeTest()
+      const horloge = new HorlogeTest([])
       const account = new bankAccount(startingBalance, horloge)
       const expectedBalance = depositMoney + startingBalance
       //When
@@ -49,8 +49,8 @@ describe('bankAccount', () => {
       //Given
       const depositMoney = 1000
       const startingBalance = 100
-      const horloge = new HorlogeTest()
       const expectedDate = '14/01/2012 14:30:45.450346'
+      const horloge = new HorlogeTest([expectedDate])
       const account = new bankAccount(startingBalance, horloge)
       const expectedBalance = depositMoney + startingBalance
       await new Promise(r => setTimeout(r, 1))
@@ -63,6 +63,33 @@ describe('bankAccount', () => {
         date: expectedDate,
         value: depositMoney,
         newBalance: expectedBalance,
+      })
+    })
+
+    test('Does 2 back to back deposits that should have a different date.', async () => {
+      //Given
+      const depositMoney = 100
+      const startingBalance = 0
+      const expectedFirstDate = '14/01/2012 14:30:45.450346'
+      const expectedSecondDate = '15/01/2012 14:30:45.450346'
+      const horloge = new HorlogeTest([expectedFirstDate, expectedSecondDate])
+      const account = new bankAccount(startingBalance, horloge)
+      await new Promise(r => setTimeout(r, 1))
+      //When
+      account.deposit(depositMoney)
+      account.deposit(depositMoney)
+      //Then
+      const firstTransaction = account.transactions[0]
+      const secondTransaction = account.transactions[1]
+      expect(firstTransaction).toEqual({
+        date: expectedFirstDate,
+        value: depositMoney,
+        newBalance: depositMoney,
+      })
+      expect(secondTransaction).toEqual({
+        date: expectedSecondDate,
+        value: depositMoney,
+        newBalance: 2 * depositMoney,
       })
     })
 
@@ -83,10 +110,10 @@ describe('bankAccount', () => {
       //Given
       const amountToWithdraw = 100
       const startingBalance = 1000
-      const horloge = new HorlogeTest()
+      const expectedDate = '14/01/2012 14:30:45.450346'
+      const horloge = new HorlogeTest([expectedDate])
       const account = new bankAccount(startingBalance, horloge)
       const expectedBalance = startingBalance - amountToWithdraw
-      const expectedDate = '14/01/2012 14:30:45.450346'
       //When
       const returnedBalance = account.withdraw(amountToWithdraw)
       //Then
